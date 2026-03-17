@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-scroll';
 
-const API = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API = 'https://porfolio-aida-backend.onrender.com/api';
 
 const Hero = () => {
   const [profile, setProfile] = useState(null);

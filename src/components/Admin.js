@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiEdit2, FiTrash2, FiPlus, FiX, FiSave, FiArrowLeft } from 'react-icons/fi';
 
-const API = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API = 'https://porfolio-aida-backend.onrender.com/api';
 
 const Admin = ({ onClose }) => {
   const [tab, setTab] = useState('profile');
