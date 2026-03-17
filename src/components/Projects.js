@@ -24,7 +24,7 @@ const Projects = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <span className="section-label">// 03 . Réalisations</span>
+          <span className="section-label">{"// 03 . Réalisations"}</span>
           <h2 className="section-title">Mes projets</h2>
           <div className="section-line"></div>
         </motion.div>

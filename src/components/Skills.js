@@ -39,7 +39,7 @@ const Skills = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <span className="section-label">// 04 . Expertise</span>
+          <span className="section-label">{"// 04 . Expertise"}</span>
           <h2 className="section-title">Compétences</h2>
           <div className="section-line"></div>
         </motion.div>

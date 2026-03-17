@@ -47,7 +47,7 @@ const About = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <span className="section-label">// 01 . À propos</span>
+          <span className="section-label">{"// 01 . À propos"}</span>
           <h2 className="section-title">Me connaître</h2>
           <div className="section-line"></div>
         </motion.div>

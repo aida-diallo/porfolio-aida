@@ -23,7 +23,7 @@ const Experience = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <span className="section-label">// 02 . Parcours</span>
+          <span className="section-label">{"// 02 . Parcours"}</span>
           <h2 className="section-title">Mon expérience</h2>
           <div className="section-line"></div>
         </motion.div>
