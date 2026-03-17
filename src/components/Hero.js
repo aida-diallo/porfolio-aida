@@ -1,8 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-scroll';
 
+const API = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const Hero = () => {
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    fetch(`${API}/profile`)
+      .then(res => res.json())
+      .then(setProfile)
+      .catch(() => setProfile({
+        greeting: 'Bonjour, je suis',
+        name: 'Aida Diallo',
+        title: 'Développeuse Full Stack',
+        description: 'Passionnée par la création d\'expériences numériques élégantes et performantes.',
+      }));
+  }, []);
+
+  if (!profile) return null;
+
   return (
     <section className="hero" id="accueil">
       <div className="container">
@@ -12,7 +30,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <span className="hero-greeting">Bonjour, je suis</span>
+            <span className="hero-greeting">{profile.greeting}</span>
           </motion.div>
 
           <motion.h1
@@ -21,7 +39,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            Aida <span className="accent">Diallo</span>
+            {profile.name.split(' ')[0]} <span className="accent">{profile.name.split(' ').slice(1).join(' ')}</span>
           </motion.h1>
 
           <motion.p
@@ -30,7 +48,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
           >
-            Développeuse Full Stack
+            {profile.title}
           </motion.p>
 
           <motion.p
@@ -39,8 +57,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
           >
-            Passionnée par la création d'expériences numériques élégantes
-            et performantes. Je transforme les idées en solutions web modernes.
+            {profile.description}
           </motion.p>
 
           <motion.div

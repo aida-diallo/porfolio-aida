@@ -1,46 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiGithub, FiExternalLink } from 'react-icons/fi';
 
+const API = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const Projects = () => {
-  const projects = [
-    {
-      number: '01',
-      name: 'E-Commerce Platform',
-      description:
-        'Plateforme e-commerce complète avec système de paiement intégré, gestion de panier et tableau de bord administrateur.',
-      tech: ['React', 'Node.js', 'MongoDB', 'Stripe'],
-      github: '#',
-      live: '#',
-    },
-    {
-      number: '02',
-      name: 'Application de Gestion',
-      description:
-        'Application de gestion de tâches et de projets avec authentification, collaboration en temps réel et notifications.',
-      tech: ['React', 'Firebase', 'Material UI', 'WebSocket'],
-      github: '#',
-      live: '#',
-    },
-    {
-      number: '03',
-      name: 'Portfolio Créatif',
-      description:
-        'Portfolio personnel avec design moderne, animations fluides et une expérience utilisateur immersive.',
-      tech: ['React', 'Framer Motion', 'CSS3', 'Responsive'],
-      github: '#',
-      live: '#',
-    },
-    {
-      number: '04',
-      name: 'API RESTful',
-      description:
-        'API backend complète avec authentification JWT, gestion des rôles et documentation Swagger intégrée.',
-      tech: ['Node.js', 'Express', 'PostgreSQL', 'JWT'],
-      github: '#',
-      live: '#',
-    },
-  ];
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API}/projects`)
+      .then(res => res.json())
+      .then(setProjects)
+      .catch(() => {});
+  }, []);
 
   return (
     <section className="section projects" id="projets">
@@ -57,35 +29,55 @@ const Projects = () => {
           <div className="section-line"></div>
         </motion.div>
 
-        <div className="projects-grid">
-          {projects.map((project, index) => (
-            <motion.div
-              key={index}
-              className="project-card"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <div className="project-number">{project.number}</div>
-              <h3 className="project-name">{project.name}</h3>
-              <p className="project-desc">{project.description}</p>
-              <div className="project-tech">
-                {project.tech.map((t, i) => (
-                  <span key={i}>{t}</span>
-                ))}
-              </div>
-              <div className="project-links">
-                <a href={project.github} className="project-link" aria-label="Code source">
-                  <FiGithub />
-                </a>
-                <a href={project.live} className="project-link" aria-label="Voir le projet">
-                  <FiExternalLink />
-                </a>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        {projects.length === 0 ? (
+          <div className="loading-section"><div className="loading-spinner"></div></div>
+        ) : (
+          <div className="projects-grid">
+            {projects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                className="project-card"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <div className="project-number">
+                  {String(index + 1).padStart(2, '0')}
+                </div>
+                <h3 className="project-name">{project.name}</h3>
+                <p className="project-desc">{project.description}</p>
+                <div className="project-tech">
+                  {project.tech.map((t, i) => (
+                    <span key={i}>{t}</span>
+                  ))}
+                </div>
+                <div className="project-links">
+                  {project.github && (
+                    <a
+                      href={project.github}
+                      className="project-link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FiGithub /> Code
+                    </a>
+                  )}
+                  {project.live && (
+                    <a
+                      href={project.live}
+                      className="project-link project-link-visit"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FiExternalLink /> Visiter
+                    </a>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

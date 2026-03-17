@@ -1,19 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
+const API = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const About = () => {
-  const stats = [
-    { number: '2+', label: 'Années d\'expérience' },
-    { number: '10+', label: 'Projets réalisés' },
-    { number: '5+', label: 'Technologies maîtrisées' },
-    { number: '100%', label: 'Passion & Engagement' },
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    fetch(`${API}/profile`)
+      .then(res => res.json())
+      .then(setProfile)
+      .catch(() => {});
+  }, []);
+
+  if (!profile) {
+    return (
+      <section className="section about" id="a-propos">
+        <div className="container">
+          <div className="loading-section"><div className="loading-spinner"></div></div>
+        </div>
+      </section>
+    );
+  }
+
+  const statsData = [
+    { number: profile.stats.years, label: "Années d'expérience" },
+    { number: profile.stats.projects, label: 'Projets réalisés' },
+    { number: profile.stats.technologies, label: 'Technologies maîtrisées' },
+    { number: profile.stats.engagement, label: 'Passion & Engagement' },
   ];
 
   const details = [
-    { label: 'Nom', value: 'Aida Diallo' },
-    { label: 'Localisation', value: 'Sénégal' },
-    { label: 'Spécialité', value: 'Développement Full Stack' },
-    { label: 'Disponibilité', value: 'Ouverte aux opportunités' },
+    { label: 'Nom', value: profile.name },
+    { label: 'Localisation', value: profile.location },
+    { label: 'Spécialité', value: profile.specialty },
+    { label: 'Disponibilité', value: profile.availability },
   ];
 
   return (
@@ -39,23 +60,12 @@ const About = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <p>
-              Je suis une développeuse passionnée par la technologie et l'innovation.
-              Mon parcours m'a permis de développer une expertise solide dans la
-              conception et le développement d'applications web modernes.
-            </p>
-            <p>
-              J'aime relever des défis techniques et créer des solutions élégantes
-              qui allient performance et esthétique. Chaque projet est pour moi
-              une opportunité d'apprendre et de repousser mes limites.
-            </p>
-            <p>
-              Mon approche se concentre sur la qualité du code, l'expérience
-              utilisateur et les bonnes pratiques de développement.
-            </p>
+            {profile.about.map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
 
             <div className="about-stats">
-              {stats.map((stat, index) => (
+              {statsData.map((stat, index) => (
                 <motion.div
                   key={index}
                   className="stat-item"

@@ -1,43 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiCode, FiServer, FiTool } from 'react-icons/fi';
 
+const API = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+const iconMap = {
+  code: <FiCode />,
+  server: <FiServer />,
+  tool: <FiTool />,
+};
+
 const Skills = () => {
-  const categories = [
-    {
-      icon: <FiCode />,
-      title: 'Front-End',
-      skills: [
-        { name: 'React.js', level: 4 },
-        { name: 'JavaScript / ES6+', level: 5 },
-        { name: 'HTML5 / CSS3', level: 5 },
-        { name: 'TypeScript', level: 3 },
-        { name: 'Tailwind CSS', level: 4 },
-      ],
-    },
-    {
-      icon: <FiServer />,
-      title: 'Back-End',
-      skills: [
-        { name: 'Node.js', level: 4 },
-        { name: 'Python', level: 4 },
-        { name: 'Express.js', level: 4 },
-        { name: 'MongoDB', level: 3 },
-        { name: 'PostgreSQL', level: 3 },
-      ],
-    },
-    {
-      icon: <FiTool />,
-      title: 'Outils & Autres',
-      skills: [
-        { name: 'Git / GitHub', level: 5 },
-        { name: 'Figma', level: 3 },
-        { name: 'Docker', level: 2 },
-        { name: 'Linux', level: 3 },
-        { name: 'Méthode Agile', level: 4 },
-      ],
-    },
-  ];
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API}/skills`)
+      .then(res => res.json())
+      .then(setCategories)
+      .catch(() => {});
+  }, []);
 
   const renderDots = (level) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -63,29 +44,33 @@ const Skills = () => {
           <div className="section-line"></div>
         </motion.div>
 
-        <div className="skills-grid">
-          {categories.map((cat, index) => (
-            <motion.div
-              key={index}
-              className="skill-category"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.15 }}
-            >
-              <div className="skill-icon">{cat.icon}</div>
-              <h3 className="skill-category-title">{cat.title}</h3>
-              <div className="skill-list">
-                {cat.skills.map((skill, i) => (
-                  <div key={i} className="skill-item">
-                    <span className="skill-name">{skill.name}</span>
-                    <div className="skill-level">{renderDots(skill.level)}</div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        {categories.length === 0 ? (
+          <div className="loading-section"><div className="loading-spinner"></div></div>
+        ) : (
+          <div className="skills-grid">
+            {categories.map((cat, index) => (
+              <motion.div
+                key={index}
+                className="skill-category"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.15 }}
+              >
+                <div className="skill-icon">{iconMap[cat.icon] || <FiCode />}</div>
+                <h3 className="skill-category-title">{cat.category}</h3>
+                <div className="skill-list">
+                  {cat.skills.map((skill, i) => (
+                    <div key={i} className="skill-item">
+                      <span className="skill-name">{skill.name}</span>
+                      <div className="skill-level">{renderDots(skill.level)}</div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,23 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiMail, FiMapPin, FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
 
+const API = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const Contact = () => {
+  const [profile, setProfile] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
     message: '',
   });
+  const [success, setSuccess] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    fetch(`${API}/profile`)
+      .then(res => res.json())
+      .then(setProfile)
+      .catch(() => {});
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const mailtoLink = `mailto:votre.email@example.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(`De: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`)}`;
-    window.location.href = mailtoLink;
+    setSending(true);
+    try {
+      const res = await fetch(`${API}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        setSuccess(true);
+        setFormData({ name: '', email: '', subject: '', message: '' });
+        setTimeout(() => setSuccess(false), 5000);
+      }
+    } catch {
+      // Fallback: ouvrir le client mail
+      const mailtoLink = `mailto:${profile?.email || ''}?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(`De: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`)}`;
+      window.location.href = mailtoLink;
+    }
+    setSending(false);
   };
 
   return (
@@ -51,24 +79,30 @@ const Contact = () => {
             <div className="contact-info">
               <div className="contact-item">
                 <FiMail className="contact-item-icon" />
-                <span className="contact-item-text">votre.email@example.com</span>
+                <span className="contact-item-text">{profile?.email || 'votre.email@example.com'}</span>
               </div>
               <div className="contact-item">
                 <FiMapPin className="contact-item-icon" />
-                <span className="contact-item-text">Sénégal</span>
+                <span className="contact-item-text">{profile?.location || 'Sénégal'}</span>
               </div>
             </div>
 
             <div className="social-links">
-              <a href="https://github.com/aida-diallo" className="social-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                <FiGithub />
-              </a>
-              <a href="#" className="social-link" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                <FiLinkedin />
-              </a>
-              <a href="#" className="social-link" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-                <FiTwitter />
-              </a>
+              {profile?.github && (
+                <a href={profile.github} className="social-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                  <FiGithub />
+                </a>
+              )}
+              {profile?.linkedin && (
+                <a href={profile.linkedin} className="social-link" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                  <FiLinkedin />
+                </a>
+              )}
+              {profile?.twitter && (
+                <a href={profile.twitter} className="social-link" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                  <FiTwitter />
+                </a>
+              )}
             </div>
           </motion.div>
 
@@ -119,9 +153,12 @@ const Contact = () => {
                 required
               ></textarea>
             </div>
+            {success && (
+              <div className="form-success">Message envoyé avec succès !</div>
+            )}
             <div className="form-submit">
-              <button type="submit" className="btn-primary">
-                Envoyer le message
+              <button type="submit" className="btn-primary" disabled={sending}>
+                {sending ? 'Envoi...' : 'Envoyer le message'}
               </button>
             </div>
           </motion.form>

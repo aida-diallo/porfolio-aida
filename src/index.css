@@ -1,22 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap');
 
 :root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #111111;
-  --bg-card: #161616;
-  --bg-card-hover: #1a1a1a;
-  --accent: #c9a87c;
-  --accent-light: #e8d5b7;
-  --accent-dark: #a07d50;
-  --text-primary: #f5f0eb;
-  --text-secondary: #a09a93;
-  --text-muted: #6b6560;
-  --border: #2a2520;
-  --border-light: #3a3530;
-  --gradient-accent: linear-gradient(135deg, #c9a87c, #e8d5b7, #c9a87c);
-  --gradient-bg: linear-gradient(180deg, #0a0a0a 0%, #111111 100%);
-  --shadow-gold: 0 0 40px rgba(201, 168, 124, 0.08);
-  --shadow-card: 0 4px 30px rgba(0, 0, 0, 0.3);
+  --bg-primary: #faf8f5;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fdf9f4;
+  --accent: #b08968;
+  --accent-light: #ddb892;
+  --accent-dark: #8a6a4e;
+  --accent-glow: rgba(176, 137, 104, 0.12);
+  --text-primary: #2b2b2b;
+  --text-secondary: #5a5a5a;
+  --text-muted: #9a9a9a;
+  --border: #e8e2da;
+  --border-light: #f0ebe4;
+  --gradient-accent: linear-gradient(135deg, #b08968, #ddb892, #b08968);
+  --gradient-hero: linear-gradient(160deg, #faf8f5 0%, #f3ede4 50%, #faf8f5 100%);
+  --shadow-soft: 0 2px 20px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 4px 30px rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 12px 40px rgba(176, 137, 104, 0.12);
   --font-display: 'Playfair Display', serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'Fira Code', monospace;
@@ -31,7 +33,7 @@
 html {
   scroll-behavior: smooth;
   scrollbar-width: thin;
-  scrollbar-color: var(--accent-dark) var(--bg-primary);
+  scrollbar-color: var(--accent-light) var(--bg-primary);
 }
 
 body {
@@ -53,13 +55,13 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--accent-dark);
+  background: var(--accent-light);
   border-radius: 3px;
 }
 
 ::selection {
   background: var(--accent);
-  color: var(--bg-primary);
+  color: #fff;
 }
 
 a {
@@ -103,9 +105,10 @@ a {
 
 .section-line {
   width: 60px;
-  height: 1px;
+  height: 2px;
   background: var(--gradient-accent);
   margin-top: 24px;
+  border-radius: 1px;
 }
 
 @media (max-width: 768px) {
