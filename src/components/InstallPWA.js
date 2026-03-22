@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     // Vérifier si l'utilisateur a déjà refusé récemment
@@ -10,14 +11,24 @@ function InstallPWA() {
     if (dismissed) {
       const dismissedDate = new Date(dismissed);
       const now = new Date();
-      // Ne pas redemander avant 7 jours
       if (now - dismissedDate < 7 * 24 * 60 * 60 * 1000) return;
     }
 
+    // Vérifier si déjà installé
+    if (window.matchMedia('(display-mode: standalone)').matches) return;
+
+    // Détecter iOS (Safari ne supporte pas beforeinstallprompt)
+    const isIOSDevice = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOSDevice) {
+      setIsIOS(true);
+      setTimeout(() => setShowPrompt(true), 3000);
+      return;
+    }
+
+    // Android / Desktop Chrome
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Petit délai pour ne pas interrompre immédiatement
       setTimeout(() => setShowPrompt(true), 3000);
     };
 
@@ -26,12 +37,16 @@ function InstallPWA() {
   }, []);
 
   const handleInstall = async () => {
+    if (isIOS) {
+      // Sur iOS on ne peut pas déclencher l'install, on ferme juste le modal
+      setShowPrompt(false);
+      return;
+    }
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setShowPrompt(false);
-    }
+    await deferredPrompt.userChoice;
+    // Fermer le modal dans tous les cas (accepté ou refusé)
+    setShowPrompt(false);
     setDeferredPrompt(null);
   };
 
@@ -44,22 +59,37 @@ function InstallPWA() {
   if (!showPrompt) return null;
 
   return (
-    <div style={styles.overlay}>
-      <div style={styles.modal}>
+    <div style={styles.overlay} onClick={handleDismiss}>
+      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.icon}>
           <img src="/favicon.svg" alt="AD" style={styles.logo} />
         </div>
         <h3 style={styles.title}>Installer l'application</h3>
-        <p style={styles.text}>
-          Ajoutez <strong>Aida Diallo Portfolio</strong> à votre écran d'accueil pour un accès rapide !
-        </p>
+        {isIOS ? (
+          <p style={styles.text}>
+            Pour installer, appuyez sur{' '}
+            <strong style={{ color: '#c8a86e' }}>Partager</strong> (icône ↑) puis{' '}
+            <strong style={{ color: '#c8a86e' }}>Sur l'écran d'accueil</strong>.
+          </p>
+        ) : (
+          <p style={styles.text}>
+            Ajoutez <strong>Aida Diallo Portfolio</strong> à votre écran d'accueil pour un accès rapide !
+          </p>
+        )}
         <div style={styles.buttons}>
           <button onClick={handleDismiss} style={styles.btnNo}>
             Non merci
           </button>
-          <button onClick={handleInstall} style={styles.btnYes}>
-            Oui, installer
-          </button>
+          {!isIOS && (
+            <button onClick={handleInstall} style={styles.btnYes}>
+              Oui, installer
+            </button>
+          )}
+          {isIOS && (
+            <button onClick={handleDismiss} style={styles.btnYes}>
+              Compris !
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -79,7 +109,6 @@ const styles = {
     justifyContent: 'center',
     zIndex: 10000,
     backdropFilter: 'blur(4px)',
-    animation: 'fadeIn 0.3s ease',
   },
   modal: {
     background: 'linear-gradient(145deg, #1a1a1a, #111)',
