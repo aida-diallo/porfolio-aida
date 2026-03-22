@@ -8,6 +8,7 @@ import Skills from './components/Skills';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Admin from './components/Admin';
+import InstallPWA from './components/InstallPWA';
 import { FiSettings } from 'react-icons/fi';
 import './App.css';
 import './components/Admin.css';
@@ -29,6 +30,7 @@ function App() {
       <Skills />
       <Contact />
       <Footer />
+      <InstallPWA />
       <button
         className="admin-toggle"
         onClick={() => setShowAdmin(true)}
