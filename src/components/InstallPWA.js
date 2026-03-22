@@ -1,11 +1,28 @@
 import React, { useState, useEffect } from 'react';
 
+function getDeviceInfo() {
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/.test(ua);
+  const isSafari = /Safari/.test(ua) && !/CriOS|Chrome|FxiOS|EdgiOS/.test(ua);
+  const isChrome = /CriOS|Chrome/.test(ua) && !/EdgiOS|Edge/.test(ua);
+  const isAndroid = /Android/.test(ua);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+  return { isIOS, isSafari, isChrome, isAndroid, isStandalone };
+}
+
 function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const [device, setDevice] = useState({});
 
   useEffect(() => {
+    const info = getDeviceInfo();
+    setDevice(info);
+
+    // Déjà installé en mode standalone
+    if (info.isStandalone) return;
+
     // Vérifier si l'utilisateur a déjà refusé récemment
     const dismissed = localStorage.getItem('pwa-dismissed');
     if (dismissed) {
@@ -14,18 +31,13 @@ function InstallPWA() {
       if (now - dismissedDate < 7 * 24 * 60 * 60 * 1000) return;
     }
 
-    // Vérifier si déjà installé
-    if (window.matchMedia('(display-mode: standalone)').matches) return;
-
-    // Détecter iOS (Safari ne supporte pas beforeinstallprompt)
-    const isIOSDevice = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
-    if (isIOSDevice) {
-      setIsIOS(true);
+    // iOS : pas de beforeinstallprompt, on affiche notre propre popup
+    if (info.isIOS) {
       setTimeout(() => setShowPrompt(true), 3000);
       return;
     }
 
-    // Android / Desktop Chrome
+    // Android / Desktop : écouter l'événement beforeinstallprompt
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -37,15 +49,13 @@ function InstallPWA() {
   }, []);
 
   const handleInstall = async () => {
-    if (isIOS) {
-      // Sur iOS on ne peut pas déclencher l'install, on ferme juste le modal
+    if (device.isIOS) {
       setShowPrompt(false);
       return;
     }
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
-    // Fermer le modal dans tous les cas (accepté ou refusé)
     setShowPrompt(false);
     setDeferredPrompt(null);
   };
@@ -58,6 +68,11 @@ function InstallPWA() {
 
   if (!showPrompt) return null;
 
+  // iOS + pas Safari (Chrome, Firefox, etc.) → dire d'ouvrir dans Safari
+  const iosNotSafari = device.isIOS && !device.isSafari;
+  // iOS + Safari → instructions pour ajouter à l'écran d'accueil
+  const iosSafari = device.isIOS && device.isSafari;
+
   return (
     <div style={styles.overlay} onClick={handleDismiss}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -65,27 +80,67 @@ function InstallPWA() {
           <img src="/favicon.svg" alt="AD" style={styles.logo} />
         </div>
         <h3 style={styles.title}>Installer l'application</h3>
-        {isIOS ? (
-          <p style={styles.text}>
-            Pour installer, appuyez sur{' '}
-            <strong style={{ color: '#c8a86e' }}>Partager</strong> (icône ↑) puis{' '}
-            <strong style={{ color: '#c8a86e' }}>Sur l'écran d'accueil</strong>.
-          </p>
-        ) : (
+
+        {iosNotSafari && (
+          <div style={styles.text}>
+            <p style={{ marginBottom: '0.8rem' }}>
+              Pour installer l'application sur votre iPhone :
+            </p>
+            <div style={styles.steps}>
+              <p style={styles.step}>
+                <span style={styles.stepNum}>1</span>
+                Ouvrez ce site dans <strong style={{ color: '#c8a86e' }}>Safari</strong>
+              </p>
+              <p style={styles.step}>
+                <span style={styles.stepNum}>2</span>
+                Appuyez sur <strong style={{ color: '#c8a86e' }}>Partager</strong> (icône ↑)
+              </p>
+              <p style={styles.step}>
+                <span style={styles.stepNum}>3</span>
+                Choisissez <strong style={{ color: '#c8a86e' }}>Sur l'écran d'accueil</strong>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {iosSafari && (
+          <div style={styles.text}>
+            <p style={{ marginBottom: '0.8rem' }}>
+              Ajoutez <strong>Aida Diallo Portfolio</strong> à votre écran d'accueil :
+            </p>
+            <div style={styles.steps}>
+              <p style={styles.step}>
+                <span style={styles.stepNum}>1</span>
+                Appuyez sur <strong style={{ color: '#c8a86e' }}>Partager</strong> (icône ↑ en bas)
+              </p>
+              <p style={styles.step}>
+                <span style={styles.stepNum}>2</span>
+                Choisissez <strong style={{ color: '#c8a86e' }}>Sur l'écran d'accueil</strong>
+              </p>
+              <p style={styles.step}>
+                <span style={styles.stepNum}>3</span>
+                Appuyez sur <strong style={{ color: '#c8a86e' }}>Ajouter</strong>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {!device.isIOS && (
           <p style={styles.text}>
             Ajoutez <strong>Aida Diallo Portfolio</strong> à votre écran d'accueil pour un accès rapide !
           </p>
         )}
+
         <div style={styles.buttons}>
           <button onClick={handleDismiss} style={styles.btnNo}>
             Non merci
           </button>
-          {!isIOS && (
+          {!device.isIOS && (
             <button onClick={handleInstall} style={styles.btnYes}>
               Oui, installer
             </button>
           )}
-          {isIOS && (
+          {device.isIOS && (
             <button onClick={handleDismiss} style={styles.btnYes}>
               Compris !
             </button>
@@ -114,7 +169,7 @@ const styles = {
     background: 'linear-gradient(145deg, #1a1a1a, #111)',
     borderRadius: '20px',
     padding: '2rem',
-    maxWidth: '360px',
+    maxWidth: '380px',
     width: '90%',
     textAlign: 'center',
     border: '1px solid rgba(200, 168, 110, 0.3)',
@@ -144,6 +199,34 @@ const styles = {
     lineHeight: '1.5',
     marginBottom: '1.5rem',
     fontFamily: "'Inter', sans-serif",
+  },
+  steps: {
+    textAlign: 'left',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.6rem',
+    marginTop: '0.5rem',
+  },
+  step: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.7rem',
+    margin: 0,
+    color: '#ccc',
+    fontSize: '0.85rem',
+  },
+  stepNum: {
+    width: '24px',
+    height: '24px',
+    borderRadius: '50%',
+    background: 'rgba(200, 168, 110, 0.2)',
+    color: '#c8a86e',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '0.75rem',
+    fontWeight: '700',
+    flexShrink: 0,
   },
   buttons: {
     display: 'flex',
