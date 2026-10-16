@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiCode, FiServer, FiTool } from 'react-icons/fi';
+import { FiCode, FiServer, FiTool, FiCloud, FiPenTool, FiGlobe, FiSmartphone } from 'react-icons/fi';
 
 const API = 'https://porfolio-aida-backend.onrender.com/api';
 
@@ -8,6 +8,10 @@ const iconMap = {
   code: <FiCode />,
   server: <FiServer />,
   tool: <FiTool />,
+  cloud: <FiCloud />,
+  design: <FiPenTool />,
+  globe: <FiGlobe />,
+  mobile: <FiSmartphone />,
 };
 
 const Skills = () => {
